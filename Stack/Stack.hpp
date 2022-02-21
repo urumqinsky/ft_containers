@@ -11,10 +11,16 @@ namespace ft {
 	template<class T, class Container = std::vector<T> >
 			class stack {
 			public:
-                typedef T value_type;
                 typedef Container container_type;
-                typedef size_t size_type;
+                typedef typename Container::value_type value_type;
+                typedef typename Container::reference reference;
+                typedef typename Container::cosnt_reference const_reference;
+                typedef typename Container::size_t size_type;
 
+            protected:
+                Container container;
+
+            public:
 				explicit stack(const container_type& ctnr = container_type()) : container(ctnr) {}
 
 				stack(const stack& other) : container(other.container) {}
@@ -77,9 +83,6 @@ namespace ft {
 						friend bool operator>=(const stack<T2, Container2>& lhs, const stack<T2, Container2>& rhs) {
 					return lhs.container >= rhs.container;
 				}
-
-			private:
-				Container container;
 			};
 }
 
