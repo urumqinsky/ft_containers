@@ -22,16 +22,16 @@ namespace ft {
                 typedef typename allocator_type::const_pointer const_pointer;
 
                 explicit vector(const allocator_type& alloc = allocator_type())
-                : vectorPtr(0), vectorSize(0), vectorCapacity(0), vectorAlloc(alloc) {
+                : vectorBegin(0), vectorSize(0), vectorCapacity(0), vectorAlloc(alloc) {
 
                 }
 
                 explicit vector(size_type n, const value_type& val = value_type(),
                                  const allocator_type& alloc = allocator_type())
                                  : vectorSize(n), vectorCapacity(n), vectorAlloc(alloc) {
-                    vectorPtr = vectorAlloc.allocate(n);
+                    vectorBegin = vectorAlloc.allocate(n);
                     for (size_type i = 0; i < n; ++i) {
-                        vectorAlloc.construct(vectorPtr + i, val);
+                        vectorAlloc.construct(vectorBegin + i, val);
                     }
                 }
 
@@ -43,7 +43,7 @@ namespace ft {
                 }
 
                 vector(const vector& other)
-                : vectorPtr(other.vectorPtr), vectorSize(other.vectorSize),
+                : vectorBegin(other.vectorBegin), vectorSize(other.vectorSize),
                 vectorCapacity(other.vectorCapacity), vectorAlloc(other.vectorAlloc) {
 
                 }
@@ -53,7 +53,7 @@ namespace ft {
                 }
 
                 vector& operator=(const vector& other) {
-                    vectorPtr = other.vectorPtr;
+                    vectorBegin = other.vectorBegin;
                     vectorSize = other.vectorSize;
                     vectorCapacity = other.vectorCapacity;
                     vectorAlloc = other.vectorAlloc;
@@ -70,8 +70,15 @@ namespace ft {
                 }
 
                 void resize(size_type n, value_type val = value_type()) {
-                    (void)n;
-                    (void)val;
+                    if (n > vectorCapacity) {
+                        reserve(vectorSize);
+                    }
+                    for (int i = vectorSize; i < n; ++i) {
+                        vectorAlloc.construct(vectorBegin + i, val);
+                    }
+                    if (n < vectorSize) {
+                        vectorSize = n;
+                    }
                 }
 
                 size_type capacity() const {
@@ -79,76 +86,98 @@ namespace ft {
                 }
 
                 bool empty() const {
-                    if (vectorSize == 0) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return vectorSize == 0;
                 }
 
                 void reserve(size_type n) {
                     if (n > vectorCapacity) {
-
+                        pointer tmpBegin = vectorAlloc.allocate(n);
+                        try {
+                            for (size_type i = 0; i < vectorSize; ++i) {
+                                vectorAlloc.construct(tmpBegin + i, *(vectorBegin + i));
+                            }
+                        } catch (std::exception& e) {
+                            for (size_type i = 0; i < vectorSize; ++i) {
+                                vectorAlloc.destroy(tmpBegin + i);
+                            }
+                            vectorAlloc.deallocate(tmpBegin, n);
+                            throw;
+                        }
+                        for (size_type i = 0; i < vectorSize; ++i) {
+                            vectorAlloc.destroy(vectorBegin + i);
+                        }
+                        vectorAlloc.deallocate(vectorBegin, vectorSize);
+                        vectorBegin = tmpBegin;
+                        vectorCapacity = vectorSize;
                     }
                 }
 
 //                Element access
                 reference operator[](size_type n) {
-                    return vectorPtr[n];
+                    return *(vectorBegin + n);
                 }
 
                 const_reference operator[](size_type n) const {
-                    return vectorPtr[n];
+                    return *(vectorBegin + n);
                 }
 
                 reference at(size_type n) {
                     if (n >= vectorSize) {
                         throw std::out_of_range("...");
                     }
-                    return vectorPtr[n];
+                    return *(vectorBegin + n);
                 }
 
                 const_reference at(size_type n) const {
                     if (n >= vectorSize) {
                         throw std::out_of_range("...");
                     }
-                    return vectorPtr[n];
+                    return *(vectorBegin + n);
                 }
 
                 reference front() {
-                    return NULL;
+                    return *vectorBegin;
                 }
 
                 const_reference front() const {
-                    return NULL;
+                    return *vectorBegin;
                 }
 
                 reference back() {
-                    return NULL;
+                    return *(vectorBegin + vectorSize - 1);
                 }
 
                 const_reference back() const {
-                    return NULL;
+                    return *(vectorBegin + vectorSize - 1);
                 }
 
+//                Modifiers
                 template<class InputIterator>
                         void assign(InputIterator first, InputIterator last) {
-
+                    (void)first;
+                    (void)last;
                 }
 
                 void assign(size_type n, const value_type& val) {
-
+                    (void)n;
+                    (void)val;
                 }
 
                 void push_back(const value_type& val) {
                      if (vectorSize == vectorCapacity) {
-                         resize();
+                         reserve(vectorCapacity * 2);
                      }
+                     vectorAlloc.construct(vectorBegin + vectorSize, val);
+                     ++vectorSize;
+                }
 
+                void pop_back() {
+                    vectorAlloc.destroy(vectorBegin + vectorSize - 1);
+                    --vectorSize;
                 }
 
             protected:
-                pointer vectorPtr;
+                pointer vectorBegin;
                 size_type vectorSize, vectorCapacity;
                 allocator_type vectorAlloc;
 
