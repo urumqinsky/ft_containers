@@ -108,7 +108,7 @@ namespace ft {
                         }
                         vectorAlloc.deallocate(vectorBegin, vectorSize);
                         vectorBegin = tmpBegin;
-                        vectorCapacity = vectorSize;
+                        vectorCapacity = n;
                     }
                 }
 
@@ -123,14 +123,14 @@ namespace ft {
 
                 reference at(size_type n) {
                     if (n >= vectorSize) {
-                        throw std::out_of_range("...");
+                        throw std::out_of_range("vector");
                     }
                     return *(vectorBegin + n);
                 }
 
                 const_reference at(size_type n) const {
                     if (n >= vectorSize) {
-                        throw std::out_of_range("...");
+                        throw std::out_of_range("vector");
                     }
                     return *(vectorBegin + n);
                 }
@@ -153,7 +153,7 @@ namespace ft {
 
 //                Modifiers
                 template<class InputIterator>
-                        void assign(InputIterator first, InputIterator last) {
+                    void assign(InputIterator first, InputIterator last) {
                     (void)first;
                     (void)last;
                 }
@@ -164,11 +164,15 @@ namespace ft {
                 }
 
                 void push_back(const value_type& val) {
-                     if (vectorSize == vectorCapacity) {
-                         reserve(vectorCapacity * 2);
-                     }
-                     vectorAlloc.construct(vectorBegin + vectorSize, val);
-                     ++vectorSize;
+                    if (vectorSize == vectorCapacity) {
+                        if (vectorCapacity == 0) {
+                            reserve(1);
+                        } else {
+                            reserve(vectorCapacity * 2);
+                        }
+                    }
+                    vectorAlloc.construct(vectorBegin + vectorSize, val);
+                    ++vectorSize;
                 }
 
                 void pop_back() {
