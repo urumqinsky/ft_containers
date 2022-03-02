@@ -53,10 +53,19 @@ namespace ft {
                 }
 
                 vector& operator=(const vector& other) {
-                    vectorBegin = other.vectorBegin;
-                    vectorSize = other.vectorSize;
-                    vectorCapacity = other.vectorCapacity;
-                    vectorAlloc = other.vectorAlloc;
+                    if (this != &other) {
+                        for (size_type i = 0; i < vectorSize; ++i) {
+                            vectorAlloc.destroy(vectorBegin + i);
+                        }
+                        vectorAlloc.deallocate(vectorBegin, vectorCapacity);
+                        vectorSize = other.vectorSize;
+                        vectorCapacity = other.vectorSize;
+                        vectorAlloc = other.vectorAlloc;
+                        vectorBegin = vectorAlloc.allocate(vectorCapacity);
+                        for (size_type i = 0; i < vectorSize; ++i) {
+                            vectorAlloc.construct(vectorBegin + i, other[i]);
+                        }
+                    }
                     return *this;
                 }
 
@@ -90,7 +99,7 @@ namespace ft {
                 }
 
                 void reserve(size_type n) {
-                    if (n > vectorCapacity) {
+                    if (n > vectorCapacity) { // перепроверить условие
                         pointer tmpBegin = vectorAlloc.allocate(n);
                         try {
                             for (size_type i = 0; i < vectorSize; ++i) {
@@ -106,7 +115,7 @@ namespace ft {
                         for (size_type i = 0; i < vectorSize; ++i) {
                             vectorAlloc.destroy(vectorBegin + i);
                         }
-                        vectorAlloc.deallocate(vectorBegin, vectorSize);
+                        vectorAlloc.deallocate(vectorBegin, vectorCapacity);
                         vectorBegin = tmpBegin;
                         vectorCapacity = n;
                     }
@@ -178,6 +187,14 @@ namespace ft {
                 void pop_back() {
                     vectorAlloc.destroy(vectorBegin + vectorSize - 1);
                     --vectorSize;
+                }
+
+                void test() {
+                    std::cout << "size: " << vectorSize << " cap: " << vectorCapacity << std::endl;
+                    vectorAlloc.deallocate(vectorBegin, 243);
+                    for (size_type i = 0; i < vectorCapacity; ++i) {
+                        vectorAlloc.destroy(vectorBegin + 19);
+                    }
                 }
 
             protected:
