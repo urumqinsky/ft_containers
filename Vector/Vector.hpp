@@ -189,14 +189,6 @@ namespace ft {
                     --vectorSize;
                 }
 
-                void test() {
-                    std::cout << "size: " << vectorSize << " cap: " << vectorCapacity << std::endl;
-                    vectorAlloc.deallocate(vectorBegin, 243);
-                    for (size_type i = 0; i < vectorCapacity; ++i) {
-                        vectorAlloc.destroy(vectorBegin + 19);
-                    }
-                }
-
             protected:
                 pointer vectorBegin;
                 size_type vectorSize, vectorCapacity;
