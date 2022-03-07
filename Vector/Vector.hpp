@@ -43,13 +43,19 @@ namespace ft {
                 }
 
                 vector(const vector& other)
-                : vectorBegin(other.vectorBegin), vectorSize(other.vectorSize),
-                vectorCapacity(other.vectorCapacity), vectorAlloc(other.vectorAlloc) {
-
+                : vectorSize(other.vectorSize),
+                vectorCapacity(other.vectorSize), vectorAlloc(other.vectorAlloc) {
+                	vectorBegin = vectorAlloc.allocate(vectorSize);
+					for (size_type i = 0; i < vectorSize; ++i) {
+						vectorAlloc.construct(vectorBegin + i, other[i]);
+					}
                 }
 
                 ~vector() {
-
+					for (int i = 0; i < vectorSize; ++i) {
+						vectorAlloc.destroy(vectorBegin + i);
+					}
+					vectorAlloc.deallocate(vectorBegin, vectorCapacity);
                 }
 
                 vector& operator=(const vector& other) {
