@@ -27,8 +27,8 @@ namespace ft {
                 }
 
                 explicit vector(size_type n, const value_type& val = value_type(),
-                                 const allocator_type& alloc = allocator_type())
-                                 : vectorSize(n), vectorCapacity(n), vectorAlloc(alloc) {
+                                const allocator_type& alloc = allocator_type())
+                                : vectorSize(n), vectorCapacity(n), vectorAlloc(alloc) {
                     vectorBegin = vectorAlloc.allocate(n);
                     for (size_type i = 0; i < n; ++i) {
                         vectorAlloc.construct(vectorBegin + i, val);
@@ -37,14 +37,13 @@ namespace ft {
 
                 template<class InputIterator>
                         vector(InputIterator first, InputIterator last,
-                                const allocator_type& alloc = allocator_type()) : vectorAlloc(alloc) {
+                               const allocator_type& alloc = allocator_type()) : vectorAlloc(alloc) {
                     (void)first;
                     (void)last;
                 }
 
                 vector(const vector& other)
-                : vectorSize(other.vectorSize),
-                vectorCapacity(other.vectorSize), vectorAlloc(other.vectorAlloc) {
+                : vectorSize(other.vectorSize), vectorCapacity(other.vectorSize), vectorAlloc(other.vectorAlloc) {
                 	vectorBegin = vectorAlloc.allocate(vectorSize);
 					for (size_type i = 0; i < vectorSize; ++i) {
 						vectorAlloc.construct(vectorBegin + i, other[i]);
@@ -52,7 +51,7 @@ namespace ft {
                 }
 
                 ~vector() {
-					for (int i = 0; i < vectorSize; ++i) {
+					for (size_type i = 0; i < vectorSize; ++i) {
 						vectorAlloc.destroy(vectorBegin + i);
 					}
 					vectorAlloc.deallocate(vectorBegin, vectorCapacity);
@@ -84,12 +83,26 @@ namespace ft {
                     return vectorAlloc.max_size();
                 }
 
+//                ПРОВЕСТИ РЕФАКТОРИНГ
                 void resize(size_type n, value_type val = value_type()) {
                     if (n > vectorCapacity) {
-                        reserve(vectorSize);
+                        if (vectorCapacity == 0 || n > vectorCapacity << 1) {
+                            reserve(n);
+                        } else {
+                            reserve(vectorCapacity << 1);
+                        }
                     }
-                    for (int i = vectorSize; i < n; ++i) {
-                        vectorAlloc.construct(vectorBegin + i, val);
+                    try {
+                        for (size_type i = vectorSize; i < n; ++i) {
+                            vectorAlloc.construct(vectorBegin + i, val);
+                            ++vectorSize;
+                        }
+                    } catch (std::exception& e) {
+                        for (size_type i = 0; i < vectorSize; ++i) {
+                            vectorAlloc.destroy(vectorBegin + i);
+                        }
+                        vectorAlloc.deallocate(vectorBegin, vectorCapacity);
+                        throw;
                     }
                     if (n < vectorSize) {
                         vectorSize = n;
@@ -105,20 +118,21 @@ namespace ft {
                 }
 
                 void reserve(size_type n) {
-                    if (n > vectorCapacity) { // перепроверить условие
+                    if (n > vectorCapacity) {
+                        size_type i, j;
                         pointer tmpBegin = vectorAlloc.allocate(n);
                         try {
-                            for (size_type i = 0; i < vectorSize; ++i) {
+                            for (i = 0; i < vectorSize; ++i) {
                                 vectorAlloc.construct(tmpBegin + i, *(vectorBegin + i));
                             }
                         } catch (std::exception& e) {
-                            for (size_type i = 0; i < vectorSize; ++i) {
-                                vectorAlloc.destroy(tmpBegin + i);
+                            for (j = 0; j < i; ++j) {
+                                vectorAlloc.destroy(tmpBegin + j);
                             }
                             vectorAlloc.deallocate(tmpBegin, n);
                             throw;
                         }
-                        for (size_type i = 0; i < vectorSize; ++i) {
+                        for (i = 0; i < vectorSize; ++i) {
                             vectorAlloc.destroy(vectorBegin + i);
                         }
                         vectorAlloc.deallocate(vectorBegin, vectorCapacity);
@@ -183,7 +197,7 @@ namespace ft {
                         if (vectorCapacity == 0) {
                             reserve(1);
                         } else {
-                            reserve(vectorCapacity * 2);
+                            reserve(vectorCapacity << 1);
                         }
                     }
                     vectorAlloc.construct(vectorBegin + vectorSize, val);
