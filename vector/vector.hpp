@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <memory>
+#include "../iterators/iterator.hpp"
 
 namespace ft {
 	template<class T, class Allocator = std::allocator<T> >
@@ -20,6 +21,11 @@ namespace ft {
 		typedef typename allocator_type::const_reference	const_reference;
 		typedef typename allocator_type::pointer			pointer;
 		typedef typename allocator_type::const_pointer		const_pointer;
+
+		typedef iter<value_type> iterator;
+		typedef iter<const value_type> const_iterator;
+		typedef reverse_iter<iterator> reverse_iterator;
+		typedef reverse_iter<const_iterator> const_reverse_iterator;
 
 		explicit vector(const allocator_type& alloc = allocator_type())
 				: vectorBegin(0), vectorSize(0), vectorCapacity(0), vectorAlloc(alloc) {}
@@ -70,6 +76,22 @@ namespace ft {
 				}
 			}
 			return *this;
+		}
+//				Iterator
+		iterator begin() {
+			return iterator(vectorBegin);
+		}
+
+		const_iterator begin() const {
+			return const_iterator(vectorBegin);
+		}
+
+		iterator end() {
+			return iterator(vectorBegin + vectorSize);
+		}
+
+		const_iterator end() const {
+			return const_iterator(vectorBegin + vectorSize);
 		}
 
 //				Capacity
@@ -179,8 +201,12 @@ namespace ft {
 		}
 
 		void assign(size_type n, const value_type& val) {
-			(void)n;
-			(void)val;
+			if (n > vectorCapacity) {
+				resize(n);
+			}
+			for (int i = 0; i < n; ++i) {
+				vectorAlloc.construct(vectorBegin + i, val);
+			}
 		}
 
 		void push_back(const value_type& val) {
@@ -198,6 +224,37 @@ namespace ft {
 		void pop_back() {
 			vectorAlloc.destroy(vectorBegin + vectorSize - 1);
 			--vectorSize;
+		}
+
+		iterator insert(iterator position, const value_type& val) {
+			(void)position;
+			(void)val;
+		}
+
+		void insert(iterator position, size_type n, const value_type& val) {
+			(void)position;
+			(void)n;
+			(void)val;
+		}
+
+		template<class InputIterator>
+		void insert(iterator position, InputIterator first, InputIterator last) {
+			(void)position;
+			(void)first;
+			(void)last;
+		}
+
+		iterator erase(iterator position) {
+			(void)position;
+		}
+
+		iterator erase(iterator first, iterator last) {
+			(void)first;
+			(void)last;
+		}
+
+		void swap (vector& x) {
+			(void)x;
 		}
 
 		void clear() {
