@@ -6,15 +6,16 @@
 #define CONTAINERS_VECTOR_HPP
 
 #include <iostream>
-#include <memory>
 #include "../iterators/iterator.hpp"
+#include "../utils/enable_if.hpp"
+#include "../utils/algorithim.hpp"
 
 namespace ft {
-	template<class T, class Allocator = std::allocator<T> >
+	template<class T, class Alloc = std::allocator<T> >
 	class vector {
 	public:
 		typedef T											value_type;
-		typedef Allocator									allocator_type;
+		typedef Alloc									allocator_type;
 		typedef typename std::size_t						size_type;
 		typedef typename std::ptrdiff_t						difference_type;
 		typedef value_type&									reference;
@@ -22,8 +23,8 @@ namespace ft {
 		typedef typename allocator_type::pointer			pointer;
 		typedef typename allocator_type::const_pointer		const_pointer;
 
-		typedef iter<value_type> iterator;
-		typedef iter<const value_type> const_iterator;
+		typedef iter<pointer> iterator;
+		typedef iter<const_pointer> const_iterator;
 		typedef reverse_iter<iterator> reverse_iterator;
 		typedef reverse_iter<const_iterator> const_reverse_iterator;
 
@@ -191,13 +192,14 @@ namespace ft {
 
 //				Modifiers
 		template<class InputIterator>
-		void assign(InputIterator first, InputIterator last) {
+		typename enable_if<!is_integral<InputIterator>::value, void>::type
+		assign(InputIterator first, InputIterator last) {
 			difference_type ptrdiff = last - first;
 			if (first > last) {
 				throw std::length_error("vector");
 			}
 			clear();
-			if (ptrdiff > vectorCapacity) {
+			if (ptrdiff > static_cast<difference_type>(vectorCapacity)) {
 				vectorAlloc.deallocate(vectorBegin, vectorCapacity);
 				vectorBegin = vectorAlloc.allocate(ptrdiff);
 				vectorCapacity = ptrdiff;
@@ -288,6 +290,36 @@ namespace ft {
 		allocator_type vectorAlloc;
 
 	};
+
+	template <class T, class Alloc>
+	bool operator==(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+		return lhs.size() == rhs.size() && equal(lhs.begin(), lhs.end(), rhs.begin());
+	}
+
+	template <class T, class Alloc>
+	bool operator!=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+		return !(lhs == rhs);
+	}
+
+	template <class T, class Alloc>
+	bool operator<(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+		return lexicographical_compare(lhs.begin(), rhs.begin(), lhs.end(), rhs.end());
+	}
+
+	template <class T, class Alloc>
+	bool operator<=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+		return !(rhs < lhs);
+	}
+
+	template <class T, class Alloc>
+	bool operator>(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+		return rhs < lhs;
+	}
+
+	template <class T, class Alloc>
+	bool operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
+		return !(lhs < rhs);
+	}
 }
 
 #endif //CONTAINERS_VECTOR_HPP
