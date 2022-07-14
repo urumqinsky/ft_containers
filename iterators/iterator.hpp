@@ -1,60 +1,17 @@
 //
-// Created by Reaper Lando on 3/18/22.
+// Created by Said Islamov on 3/18/22.
 //
 
 #ifndef CONTAINERS_ITERATOR_HPP
 #define CONTAINERS_ITERATOR_HPP
 
-#include <iostream>
+#include "iterator_traits.hpp"
 
 namespace ft {
-	struct input_iterator_tag { };
-	struct output_iterator_tag { };
-	struct forward_iterator_tag : public input_iterator_tag { };
-	struct bidirectional_iterator_tag : public forward_iterator_tag { };
-	struct random_access_iterator_tag : public bidirectional_iterator_tag { };
-	struct contiguous_iterator_tag: public random_access_iterator_tag { };
-
-	template<class Iter>
-	struct iterator_traits {
-		typedef typename Iter::difference_type		difference_type;
-		typedef typename Iter::value_type			value_type;
-		typedef typename Iter::pointer				pointer;
-		typedef typename Iter::reference			reference;
-		typedef typename Iter::iterator_category	iterator_category;
-	};
-
 	template<class T>
-	struct iterator_traits<T*> {
-		typedef std::ptrdiff_t				difference_type;
-		typedef T							value_type;
-		typedef T*							pointer;
-		typedef T&							reference;
-		typedef random_access_iterator_tag	iterator_category;
-	};
-
-	template<class T>
-	struct iterator_traits<const T*> {
-		typedef std::ptrdiff_t				difference_type;
-		typedef T							value_type;
-		typedef T*							pointer;
-		typedef T&							reference;
-		typedef random_access_iterator_tag	iterator_category;
-	};
-
-	template<class Category, class T, class Distance = std::ptrdiff_t, class Pointer = T*, class Reference = T&>
-	struct iterator {
-		typedef T			value_type;
-		typedef Distance	difference_type;
-		typedef Pointer		pointer;
-		typedef Reference	reference;
-		typedef Category	iterator_category;
-	};
-
-	template<class T>
-	class random_access_iterator {
+	class iter {
 	public:
-		typedef T iterator_type;
+		typedef T															iterator_type;
 		typedef typename iterator_traits<iterator_type>::difference_type	difference_type;
 		typedef typename iterator_traits<iterator_type>::value_type			value_type;
 		typedef typename iterator_traits<iterator_type>::pointer			pointer;
@@ -62,10 +19,113 @@ namespace ft {
 		typedef typename iterator_traits<iterator_type>::iterator_category	iterator_category;
 
 	private:
-//		ptr
+		iterator_type i;
+
 	public:
-//		Methods
+		iter() : i() {}
+
+		explicit iter(iterator_type x) : i(x) {}
+
+		template <class U>
+		iter(const iter<U>& x) : i(x.base()) {}
+
+		iterator_type base() const {
+			return i;
+		}
+
+		reference operator*() const {
+			return *i;
+		}
+
+		pointer operator->() const {
+			return &**i;
+		}
+
+		iter& operator++() {
+			++i;
+			return *this;
+		}
+
+		iter operator++(int) {
+			iter temp = *this;
+			++i;
+			return temp;
+		}
+
+		iter& operator--() {
+			--i;
+			return *this;
+		}
+
+		iter operator--(int) {
+			iter temp = *this;
+			--i;
+			return temp;
+		}
+
+		iter operator+(difference_type n) const {
+			return iter(i + n);
+		}
+
+		iter& operator+=(difference_type n) {
+			i += n;
+			return *this;
+		}
+
+		iter operator-(difference_type n) {
+			return iter(i - n);
+		}
+
+		iter& operator-=(difference_type n) {
+			i -= n;
+			return *this;
+		}
+
+		reference operator[](difference_type n) const {
+			return i[n];
+		}
 	};
+
+	template<class Iter1>
+	bool operator==(const iter<Iter1>& lhs, const iter<Iter1>& rhs) {
+		return lhs.base() == rhs.base();
+	}
+
+	template<class Iter1>
+	bool operator<(const iter<Iter1>& lhs, const iter<Iter1>& rhs) {
+		return lhs.base() < rhs.base();
+	}
+
+	template<class Iter1>
+	bool operator!=(const iter<Iter1>& lhs, const iter<Iter1>& rhs) {
+		return !(lhs == rhs);
+	}
+
+	template<class Iter1>
+	bool operator>(const iter<Iter1>& lhs, const iter<Iter1>& rhs) {
+		return rhs < lhs;
+	}
+
+	template<class Iter1>
+	bool operator>=(const iter<Iter1>& lhs, const iter<Iter1>& rhs) {
+		return !(lhs < rhs);
+	}
+
+	template<class Iter1>
+	bool operator<=(const iter<Iter1>& lhs, const iter<Iter1>& rhs) {
+		return !(rhs < lhs);
+	}
+
+	template<class Iter1, class Iter2>
+	typename iter<Iter1>::difference_type operator-(const iter<Iter1>& lhs, const iter<Iter2>& rhs) {
+		return lhs.base() - rhs.base();
+	}
+
+	template<class Iter1>
+	iter<Iter1> operator+(typename iter<Iter1>::difference_type n, iter<Iter1> x) {
+		x += n;
+		return x;
+	}
 }
 
 #endif //CONTAINERS_ITERATOR_HPP
