@@ -1,0 +1,8 @@
+//
+// Created by Said Islamov on 14.07.2022.
+//
+
+#ifndef CONTAINERS_ITERATOR_TRAITS_HPP
+#define CONTAINERS_ITERATOR_TRAITS_HPP
+
+#endif //CONTAINERS_ITERATOR_TRAITS_HPP
