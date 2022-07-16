@@ -1,5 +1,5 @@
 //
-// Created by Reaper Lando on 2/11/22.
+// Created by Said Islamov on 2/11/22.
 //
 
 #ifndef CONTAINERS_STACK_HPP
