@@ -1,5 +1,5 @@
 //
-// Created by Reaper Lando on 2/11/22.
+// Created by Said Islamov on 2/11/22.
 //
 
 #ifndef CONTAINERS_VECTOR_HPP
@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include "../iterators/iterator.hpp"
+#include "../iterators/reverse_iterator.hpp"
 #include "../utils/enable_if.hpp"
 #include "../utils/algorithim.hpp"
 
@@ -15,7 +16,7 @@ namespace ft {
 	class vector {
 	public:
 		typedef T											value_type;
-		typedef Alloc									allocator_type;
+		typedef Alloc										allocator_type;
 		typedef typename std::size_t						size_type;
 		typedef typename std::ptrdiff_t						difference_type;
 		typedef value_type&									reference;
@@ -25,8 +26,8 @@ namespace ft {
 
 		typedef iter<pointer> iterator;
 		typedef iter<const_pointer> const_iterator;
-		typedef reverse_iter<iterator> reverse_iterator;
-		typedef reverse_iter<const_iterator> const_reverse_iterator;
+		typedef ft::reverse_iterator<iterator> reverse_iterator;
+		typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
 		explicit vector(const allocator_type& alloc = allocator_type())
 				: vectorBegin(0), vectorSize(0), vectorCapacity(0), vectorAlloc(alloc) {}
@@ -42,9 +43,18 @@ namespace ft {
 
 		template<class InputIterator>
 		vector(InputIterator first, InputIterator last,
-			   const allocator_type& alloc = allocator_type()) : vectorAlloc(alloc) {
-			(void)first;
-			(void)last;
+			   const allocator_type& alloc = allocator_type(),
+			   typename enable_if<!is_integral<InputIterator>::value>::type* = NULL)
+			   : vectorBegin(0), vectorSize(0), vectorCapacity(0), vectorAlloc(alloc) {
+			difference_type ptrdiff = last - first;
+			if (first > last) {
+				throw std::length_error("vector");
+			}
+			for (;first != last;) {
+				push_back(*first);
+				first++;
+			}
+			vectorCapacity = ptrdiff;
 		}
 
 		vector(const vector& other)
@@ -89,6 +99,22 @@ namespace ft {
 
 		const_iterator end() const {
 			return const_iterator(vectorBegin + vectorSize);
+		}
+
+		reverse_iterator rbegin() {
+			return reverse_iterator(end());
+		}
+
+		const_reverse_iterator rbegin() const {
+			return const_reverse_iterator(end());
+		}
+
+		reverse_iterator rend() {
+			return reverse_iterator(begin());
+		}
+
+		const_reverse_iterator rend() const {
+			return const_reverse_iterator(begin());
 		}
 
 //				Capacity
@@ -204,7 +230,7 @@ namespace ft {
 				vectorBegin = vectorAlloc.allocate(ptrdiff);
 				vectorCapacity = ptrdiff;
 			}
-			for (int i = 0; first != last; i++) {
+			for (int i = 0; first < last; i++) {
 				vectorAlloc.construct(vectorBegin + i, *first);
 				first++;
 			}
@@ -255,7 +281,8 @@ namespace ft {
 		}
 
 		template<class InputIterator>
-		void insert(iterator position, InputIterator first, InputIterator last) {
+		typename enable_if<!is_integral<InputIterator>::value>::type
+		insert(iterator position, InputIterator first, InputIterator last) {
 			(void)position;
 			(void)first;
 			(void)last;
@@ -319,6 +346,11 @@ namespace ft {
 	template <class T, class Alloc>
 	bool operator>=(const vector<T, Alloc>& lhs, const vector<T, Alloc>& rhs) {
 		return !(lhs < rhs);
+	}
+
+	template <class T, class Alloc>
+	void swap(vector<T,Alloc>& lhs, vector<T, Alloc>& rhs) {
+		lhs.swap(rhs);
 	}
 }
 
