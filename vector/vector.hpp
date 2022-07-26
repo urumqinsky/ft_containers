@@ -29,6 +29,12 @@ namespace ft {
 		typedef ft::reverse_iterator<iterator> reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator> const_reverse_iterator;
 
+	protected:
+		pointer vectorBegin;
+		size_type vectorSize, vectorCapacity;
+		allocator_type vectorAlloc;
+
+	public:
 		explicit vector(const allocator_type& alloc = allocator_type())
 				: vectorBegin(0), vectorSize(0), vectorCapacity(0), vectorAlloc(alloc) {}
 
@@ -45,16 +51,15 @@ namespace ft {
 		vector(InputIterator first, InputIterator last,
 			   const allocator_type& alloc = allocator_type(),
 			   typename enable_if<!is_integral<InputIterator>::value>::type* = NULL)
-			   : vectorBegin(0), vectorSize(0), vectorCapacity(0), vectorAlloc(alloc) {
-			difference_type ptrdiff = last - first;
+			   : vectorBegin(0), vectorSize(last - first), vectorCapacity(last - first), vectorAlloc(alloc) {
 			if (first > last) {
 				throw std::length_error("vector");
 			}
-			for (;first != last;) {
-				push_back(*first);
+			vectorBegin = vectorAlloc.allocate(vectorSize);
+			for (size_type i = 0; first < last; ++i) {
+				vectorAlloc.construct(vectorBegin + i, *first);
 				first++;
 			}
-			vectorCapacity = ptrdiff;
 		}
 
 		vector(const vector& other)
@@ -128,7 +133,7 @@ namespace ft {
 
 //				ПРОВЕСТИ РЕФАКТОРИНГ
 		void resize(size_type n, value_type val = value_type()) {
-			if (n > vectorCapacity) {
+			if (vectorCapacity < n) {
 				if (vectorCapacity == 0 || n > vectorCapacity << 1) {
 					reserve(n);
 				} else {
@@ -154,7 +159,9 @@ namespace ft {
 		}
 
 		void reserve(size_type n) {
-			if (n > vectorCapacity) {
+			if (max_size() < n) {
+				throw std::length_error("vector");
+			} else if (vectorCapacity < n) {
 				size_type i, j;
 				pointer tmpBegin = vectorAlloc.allocate(n);
 				try {
@@ -187,14 +194,14 @@ namespace ft {
 		}
 
 		reference at(size_type n) {
-			if (n >= vectorSize) {
+			if (vectorSize <= n) {
 				throw std::out_of_range("vector");
 			}
 			return *(vectorBegin + n);
 		}
 
 		const_reference at(size_type n) const {
-			if (n >= vectorSize) {
+			if (vectorSize <= n) {
 				throw std::out_of_range("vector");
 			}
 			return *(vectorBegin + n);
@@ -220,26 +227,26 @@ namespace ft {
 		template<class InputIterator>
 		typename enable_if<!is_integral<InputIterator>::value, void>::type
 		assign(InputIterator first, InputIterator last) {
-			difference_type ptrdiff = last - first;
+			size_type diff = last - first;
 			if (first > last) {
 				throw std::length_error("vector");
 			}
 			clear();
-			if (ptrdiff > static_cast<difference_type>(vectorCapacity)) {
+			if (vectorCapacity < diff) {
 				vectorAlloc.deallocate(vectorBegin, vectorCapacity);
-				vectorBegin = vectorAlloc.allocate(ptrdiff);
-				vectorCapacity = ptrdiff;
+				vectorBegin = vectorAlloc.allocate(diff);
+				vectorCapacity = diff;
 			}
-			for (int i = 0; first < last; i++) {
+			for (size_type i = 0; first < last; i++) {
 				vectorAlloc.construct(vectorBegin + i, *first);
 				first++;
 			}
-			vectorSize = ptrdiff;
+			vectorSize = diff;
 		}
 
 		void assign(size_type n, const value_type& val) {
 			clear();
-			if (n > vectorCapacity) {
+			if (vectorCapacity < n) {
 				vectorAlloc.deallocate(vectorBegin, vectorCapacity);
 				vectorBegin = vectorAlloc.allocate(n);
 				vectorCapacity = n;
@@ -276,8 +283,19 @@ namespace ft {
 
 		void insert(iterator position, size_type n, const value_type& val) {
 			(void)position;
-			(void)n;
 			(void)val;
+			if (n != 0) {
+				if (max_size() - vectorSize < n) {
+					throw std::length_error("vector");
+				} else if (vectorCapacity < vectorSize + n) {
+					size_type tmpCap = vectorCapacity;
+					tmpCap = max_size() - tmpCap / 2 < tmpCap ? 0 : tmpCap + tmpCap / 2;
+					if (tmpCap < vectorSize + n) {
+						tmpCap = vectorSize + n;
+					}
+					pointer tmpBegin = vectorAlloc.allocate(tmpCap);
+				}
+			}
 		}
 
 		template<class InputIterator>
@@ -289,19 +307,35 @@ namespace ft {
 		}
 
 		iterator erase(iterator position) {
-			(void)position;
+			erase(position, position + 1);
 		}
 
 		iterator erase(iterator first, iterator last) {
-			(void)first;
-			(void)last;
+			size_type diff = end() - last;
+			pointer tmp = vectorAlloc.allocate(diff);
+			for (size_type i = 0; i < diff; ++i) {
+				vectorAlloc.construct(tmp + i, *(last + i));
+			}
+			for (size_type i = first - begin(); i < size(); ++i) {
+				vectorAlloc.destroy(vectorBegin + i);
+			}
+			size_type j = diff;
+			for (size_type i = first - begin(); i < j; ++i) {
+				vectorAlloc.construct(vectorBegin + i, *(tmp++));
+			}
+			return iterator(vectorBegin);
 		}
 
-		void swap(vector& x) {
-			std::swap(vectorBegin, x.vectorBegin);
-			std::swap(vectorSize, x.vectorSize);
-			std::swap(vectorCapacity, x.vectorCapacity);
-			std::swap(vectorAlloc, x.vectorAlloc);
+		void swap(vector& other) {
+			if (vectorAlloc == other.vectorAlloc) {
+				std::swap(vectorBegin, other.vectorBegin);
+				std::swap(vectorSize, other.vectorSize);
+				std::swap(vectorCapacity, other.vectorCapacity);
+			} else {
+				vector tmp = *this;
+				*this = other;
+				other = tmp;
+			}
 		}
 
 		void clear() {
@@ -310,12 +344,6 @@ namespace ft {
 			}
 			vectorSize = 0;
 		}
-
-	protected:
-		pointer vectorBegin;
-		size_type vectorSize, vectorCapacity;
-		allocator_type vectorAlloc;
-
 	};
 
 	template <class T, class Alloc>
