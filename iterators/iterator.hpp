@@ -91,8 +91,18 @@ namespace ft {
 		return lhs.base() == rhs.base();
 	}
 
+	template<class Iter1, class Iter2>
+	bool operator==(const iter<Iter1>& lhs, const iter<Iter2>& rhs) {
+		return lhs.base() == rhs.base();
+	}
+
 	template<class Iter1>
 	bool operator<(const iter<Iter1>& lhs, const iter<Iter1>& rhs) {
+		return lhs.base() < rhs.base();
+	}
+
+	template<class Iter1, class Iter2>
+	bool operator<(const iter<Iter1>& lhs, const iter<Iter2>& rhs) {
 		return lhs.base() < rhs.base();
 	}
 
@@ -101,8 +111,18 @@ namespace ft {
 		return !(lhs == rhs);
 	}
 
+	template<class Iter1, class Iter2>
+	bool operator!=(const iter<Iter1>& lhs, const iter<Iter2>& rhs) {
+		return !(lhs == rhs);
+	}
+
 	template<class Iter1>
 	bool operator>(const iter<Iter1>& lhs, const iter<Iter1>& rhs) {
+		return rhs < lhs;
+	}
+
+	template<class Iter1, class Iter2>
+	bool operator>(const iter<Iter1>& lhs, const iter<Iter2>& rhs) {
 		return rhs < lhs;
 	}
 
@@ -111,8 +131,18 @@ namespace ft {
 		return !(lhs < rhs);
 	}
 
+	template<class Iter1, class Iter2>
+	bool operator>=(const iter<Iter1>& lhs, const iter<Iter2>& rhs) {
+		return !(lhs < rhs);
+	}
+
 	template<class Iter1>
 	bool operator<=(const iter<Iter1>& lhs, const iter<Iter1>& rhs) {
+		return !(rhs < lhs);
+	}
+
+	template<class Iter1, class Iter2>
+	bool operator<=(const iter<Iter1>& lhs, const iter<Iter2>& rhs) {
 		return !(rhs < lhs);
 	}
 
