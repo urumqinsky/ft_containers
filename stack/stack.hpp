@@ -28,7 +28,9 @@ namespace ft {
 		stack(const stack& other) : container(other.container) {}
 
 		stack& operator=(const stack& other) {
-			container = other.container;
+			if (this != &other) {
+				container = other.container;
+			}
 			return *this;
 		}
 
