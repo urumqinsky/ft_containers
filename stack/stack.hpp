@@ -5,89 +5,97 @@
 #ifndef CONTAINERS_STACK_HPP
 #define CONTAINERS_STACK_HPP
 
-#include <vector>
+#include "../vector/vector.hpp"
 
 namespace ft {
-	template<class T, class Container = std::vector<T> >
+	template<class T, class Container = ft::vector<T> >
 	class stack {
 	public:
-		typedef Container							container_type;
-		typedef typename Container::value_type		value_type;
-		typedef typename Container::reference		reference;
-		typedef typename Container::const_reference	const_reference;
-		typedef typename Container::size_t			size_type;
+		typedef Container									container_type;
+		typedef typename container_type::value_type			value_type;
+		typedef typename container_type::reference			reference;
+		typedef typename container_type::const_reference	const_reference;
+		typedef typename container_type::size_type			size_type;
 
 	protected:
-		Container container;
+		container_type c;
 
 	public:
-		explicit stack(const container_type& ctnr = container_type()) : container(ctnr) {}
+		explicit stack(const container_type& c = container_type()) : c(c) {}
 
 		~stack() {}
 
-		stack(const stack& other) : container(other.container) {}
+		stack(const stack& other) : c(other.c) {}
 
 		stack& operator=(const stack& other) {
 			if (this != &other) {
-				container = other.container;
+				c = other.c;
 			}
 			return *this;
 		}
 
 		bool empty() const {
-			return container.empty();
+			return c.empty();
 		}
 
 		size_type size() const {
-			return container.size();
+			return c.size();
 		}
 
-		value_type& top() {
-			return container.back();
+		reference top() {
+			return c.back();
 		}
 
-		const value_type& top() const {
-			return container.back();
+		const_reference top() const {
+			return c.back();
 		}
 
-		void push(const value_type& val) {
-			container.push_back(val);
+		void push(const value_type& x) {
+			c.push_back(x);
 		}
 
 		void pop() {
-			container.pop_back();
+			c.pop_back();
 		}
 
-		template <class T2, class Container2>
-		friend bool operator==(const stack<T2, Container2>& lhs, const stack<T2, Container2>& rhs) {
-			return lhs.container == rhs.container;
+		bool eq(const stack<T, Container>& x) const {
+			return c == x.c;
 		}
 
-		template <class T2, class Container2>
-		friend bool operator!=(const stack<T2, Container2>& lhs, const stack<T2, Container2>& rhs) {
-			return lhs.container != rhs.container;
-		}
-
-		template <class T2, class Container2>
-		friend bool operator<(const stack<T2, Container2>& lhs, const stack<T2, Container2>& rhs) {
-			return lhs.container < rhs.container;
-		}
-
-		template <class T2, class Container2>
-		friend bool operator<=(const stack<T2, Container2>& lhs, const stack<T2, Container2>& rhs) {
-			return lhs.container <= rhs.container;
-		}
-
-		template <class T2, class Container2>
-		friend bool operator>(const stack<T2, Container2>& lhs, const stack<T2, Container2>& rhs) {
-			return lhs.container > rhs.container;
-		}
-
-		template <class T2, class Container2>
-		friend bool operator>=(const stack<T2, Container2>& lhs, const stack<T2, Container2>& rhs) {
-			return lhs.container >= rhs.container;
+		bool lt(const stack<T, Container>& x) const {
+			return c < x.c;
 		}
 	};
+
+	template <class T, class Container>
+	bool operator==(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
+		return lhs.eq(rhs);
+	}
+
+	template <class T, class Container>
+	bool operator!=(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
+		return !(lhs == rhs);
+	}
+
+	template <class T, class Container>
+	bool operator<(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
+		return lhs.lt(rhs);
+	}
+
+	template <class T, class Container>
+	bool operator<=(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
+		return !(rhs < lhs);
+	}
+
+	template <class T, class Container>
+	bool operator>(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
+		return rhs < lhs;
+	}
+
+	template <class T, class Container>
+	bool operator>=(const stack<T, Container>& lhs, const stack<T, Container>& rhs) {
+		return !(lhs < rhs);
+	}
 }
 
 #endif //CONTAINERS_STACK_HPP
