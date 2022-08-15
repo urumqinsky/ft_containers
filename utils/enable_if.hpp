@@ -30,6 +30,9 @@ namespace ft {
 	struct is_integral : public integral_constant<bool, false> {};
 
 	template<>
+	struct is_integral<bool> : public integral_constant<bool, true> {};
+
+	template<>
 	struct is_integral<char> : public integral_constant<bool, true> {};
 
 	template<>
