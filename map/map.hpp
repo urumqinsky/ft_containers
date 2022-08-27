@@ -6,6 +6,7 @@
 #define CONTAINERS_MAP_HPP
 
 #include "../utils/tree.hpp"
+#include "../utils/algorithim.hpp"
 
 namespace ft {
 	template<class Key, class T, class Compare = std::less<Key>,
@@ -48,15 +49,23 @@ namespace ft {
 
 	public:
 
-		map() : _tree() {}
-
-		explicit map(const key_compare& comp = key_compare(), const allocator_type& a = allocator_type()) {}
+		explicit map(const key_compare& comp = key_compare(), const allocator_type& a = allocator_type()) {
+			(void)comp;
+			(void)a;
+		}
 
 		template <class InputIterator>
 		map(InputIterator first, InputIterator last, const key_compare& comp = key_compare(),
-			 const allocator_type& alloc = allocator_type()) {}
+			 const allocator_type& alloc = allocator_type()) {
+			(void)first;
+			(void)last;
+			(void)comp;
+			(void)alloc;
+		}
 
-		map(const map& m) {}
+		map(const map& m) {
+			(void)m;
+		}
 
 		~map() {}
 
@@ -114,7 +123,9 @@ namespace ft {
 			return _tree.max_size();
 		}
 
-		mapped_type& operator[](const key_type& k) {}
+		mapped_type& operator[](const key_type& k) {
+			(void)k;
+		}
 
 		std::pair<iterator, bool> insert(const value_type& v) {
 			return _tree.insert(v);
@@ -197,6 +208,48 @@ namespace ft {
 			return _tree.equal_range(k);
 		}
 	};
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator==(const map<Key, T, Compare, Allocator>& x,
+					const map<Key, T, Compare, Allocator>& y) {
+		return x.size() == y.size() && ft::equal(x.begin(), x.end(), y.begin());
+	}
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator< (const map<Key, T, Compare, Allocator>& x,
+					const map<Key, T, Compare, Allocator>& y) {
+		return ft::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());
+	}
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator!=(const map<Key, T, Compare, Allocator>& x,
+					const map<Key, T, Compare, Allocator>& y) {
+		return !(x == y);
+	}
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator> (const map<Key, T, Compare, Allocator>& x,
+					const map<Key, T, Compare, Allocator>& y) {
+		return y < x;
+	}
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator>=(const map<Key, T, Compare, Allocator>& x,
+					const map<Key, T, Compare, Allocator>& y) {
+		return !(x < y);
+	}
+
+	template <class Key, class T, class Compare, class Allocator>
+	bool operator<=(const map<Key, T, Compare, Allocator>& x,
+					const map<Key, T, Compare, Allocator>& y) {
+		return !(y < x);
+	}
+
+	template <class Key, class T, class Compare, class Allocator>
+	void swap(const map<Key, T, Compare, Allocator>& x,
+			  const map<Key, T, Compare, Allocator>& y) {
+		return x.swap(y);
+	}
 }
 
 #endif //CONTAINERS_MAP_HPP
