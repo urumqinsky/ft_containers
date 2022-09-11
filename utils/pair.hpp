@@ -2,8 +2,8 @@
 // Created by Said Islamov on 15.07.2022.
 //
 
-#ifndef CONTAINERS_UTILITY_HPP
-#define CONTAINERS_UTILITY_HPP
+#ifndef CONTAINERS_PAIR_HPP
+#define CONTAINERS_PAIR_HPP
 
 namespace ft {
 	template<class T1, class T2>
@@ -67,4 +67,4 @@ namespace ft {
 	}
 }
 
-#endif //CONTAINERS_UTILITY_HPP
+#endif //CONTAINERS_PAIR_HPP
